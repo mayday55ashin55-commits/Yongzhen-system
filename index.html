@@ -24,7 +24,6 @@
         .color-box { width: 100%; aspect-ratio: 1; border-radius: 4px; margin-bottom: 5px; background-size: cover; background-position: center; border: 1px solid rgba(0,0,0,0.05); }
         .swatch span { font-size: 12px; font-weight: bold; color: #555; }
         .footer-note { color: #777; font-size: 14px; text-align: center; margin-top: 20px; width: 100%; max-width: 800px; line-height: 1.6; }
-        #embossed-btn { background: #f0f0f0; border: 2px dashed #007AFF; }
     </style>
 </head>
 <body>
@@ -51,13 +50,8 @@
             </div>
             <div class="section-title">2. 玻璃材質 (僅限 A 區)</div>
             <div id="glass-palette" class="palette-grid"></div>
-            <div class="section-title">3. 特殊材質 (僅限 B、C 區)</div>
-            <div class="palette-grid">
-                <div class="swatch" id="embossed-btn" onclick="applyEmbossed()">
-                    <div id="embossed-preview" class="color-box" style="background-image: url('https://drive.google.com/thumbnail?id=14aohdKOGHAKpTpyVW-fJbePKbOzcmWk_&sz=w1000')"></div>
-                    <span>對應外框凸板</span>
-                </div>
-            </div>
+            <div class="section-title">3. 凸板材質 (僅限 B、C 區)</div>
+            <div id="embossed-palette" class="palette-grid"></div>
             <div class="section-title">4. 木紋系列面板 (T & C 系列)</div>
             <div id="wood-palette" class="palette-grid"></div>
             <div class="section-title">5. 純色系列面板 (R 系列)</div>
@@ -68,29 +62,23 @@
 
     <script>
         let currentId = 'zoneB';
-        let currentFrame = 'dark';
-        let zoneStates = { zoneA: 'empty', zoneB: 'empty', zoneC: 'empty' };
-
         const framePaths = {
             'dark': "https://drive.google.com/thumbnail?id=1IGGYjBctTpq5F9BlCLIJg8a68_5ylVv-&sz=w1000",
             'white': "https://drive.google.com/thumbnail?id=1slAMTwIExEFZqR4r9C-iwFtPMyACgput&sz=w1000",
             'silver': "https://drive.google.com/thumbnail?id=1YKfxSpQ_9pIyMnhTmGKZlQqB9w09dxxD&sz=w1000",
             'black': "https://drive.google.com/thumbnail?id=1sMQiXbn73SGSBeYPWQJx9CMTRzLknYDo&sz=w1000"
         };
-
-        const embossedPaths = {
-            'dark': "https://drive.google.com/thumbnail?id=14aohdKOGHAKpTpyVW-fJbePKbOzcmWk_&sz=w1000",
-            'white': "https://drive.google.com/thumbnail?id=1bnPV6SiH-XVnO-ln34c8k5nmfbYKLlUr&sz=w1000",
-            'silver': "https://drive.google.com/thumbnail?id=1P-FBfNm6ISnHuOXmW_BZsmEVNJ9thgRV&sz=w1000",
-            'black': "https://drive.google.com/thumbnail?id=1cy4l401xSJLGVOxWWLAm_G-MBt8A9NVo&sz=w1000"
-        };
-
+        const embossedMaterials = [
+            {id:'深灰色凸板', img:'https://drive.google.com/thumbnail?id=14aohdKOGHAKpTpyVW-fJbePKbOzcmWk_&sz=w1000'},
+            {id:'白色凸板', img:'https://drive.google.com/thumbnail?id=1bnPV6SiH-XVnO-ln34c8k5nmfbYKLlUr&sz=w1000'},
+            {id:'銀色凸板', img:'https://drive.google.com/thumbnail?id=1P-FBfNm6ISnHuOXmW_BZsmEVNJ9thgRV&sz=w1000'},
+            {id:'黑色凸板', img:'https://drive.google.com/thumbnail?id=1cy4l401xSJLGVOxWWLAm_G-MBt8A9NVo&sz=w1000'}
+        ];
         const glassMaterials = [
             {id:'霧玻璃', img:'https://drive.google.com/thumbnail?id=1rERHx1pwWdI0L1CZVIP1OhnqByTw_evJ&sz=w1000'},
             {id:'清玻璃', img:'https://drive.google.com/thumbnail?id=1soHgAKe1eUKxpvf3hSYWQ_5PgPY_yIfM&sz=w1000'},
             {id:'條紋玻璃', img:'https://drive.google.com/thumbnail?id=1dZ1yj9qP16MMt3VHEb47ZaNIl9qavEOy&sz=w1000'}
         ];
-
         const woodColors = [
             {id:'T-9302', img:'https://drive.google.com/thumbnail?id=11qTu6bVct1_o0XTRJV9ERLqmCGsVHRim&sz=w1000'},
             {id:'T-9305', img:'https://drive.google.com/thumbnail?id=17DKJwuo-Qsebu_5BUnKPXixgdrYoqc80&sz=w1000'},
@@ -116,7 +104,6 @@
             {id:'C-907', img:'https://drive.google.com/thumbnail?id=1YUmzK9q8gxmK6mQXn3Mmny-wIeSUA6pf&sz=w1000'},
             {id:'C-908', img:'https://drive.google.com/thumbnail?id=1lCLjAdodvop1hARDjwIZ8sPeZ_gAsOaK&sz=w1000'}
         ];
-
         const solidColors = [
             {id:'R-6027', hex:'#F3AD3E'}, {id:'R-6028', hex:'#EF8E4A'}, {id:'R-6030', hex:'#F78759'}, {id:'R-6029', hex:'#EA5E3D'},
             {id:'R-6010', hex:'#E45E91'}, {id:'R-6016', hex:'#DC3B6D'}, {id:'R-6018', hex:'#CF3841'}, {id:'R-6019', hex:'#6A2D2A'},
@@ -125,54 +112,33 @@
             {id:'R-6005', hex:'#BFC1BE'}, {id:'R-6006', hex:'#939C9B'}, {id:'R-6007', hex:'#818A89'}, {id:'R-6008', hex:'#485053'},
             {id:'R-6066', hex:'#3F70AB'}, {id:'R-6067', hex:'#3054A0'}, {id:'R-6068', hex:'#313A7B'}, {id:'R-6061', hex:'#2E364D'}
         ];
-
-        function changeFrame(type) {
-            currentFrame = type;
-            document.getElementById('top-frame').src = framePaths[type];
-            document.getElementById('embossed-preview').style.backgroundImage = `url('${embossedPaths[type]}')`;
-            // 自動更新 B、C 區如果正在使用凸板
-            ['zoneB', 'zoneC'].forEach(id => {
-                if(zoneStates[id] === 'embossed') {
-                    document.getElementById(id).style.backgroundImage = `url('${embossedPaths[type]}')`;
-                }
-            });
-        }
-
+        function changeFrame(type) { document.getElementById('top-frame').src = framePaths[type]; }
         function selectZone(id) {
             document.querySelectorAll('.zone').forEach(z => z.classList.remove('active'));
             document.getElementById(id).classList.add('active');
             currentId = id;
         }
-
-        function applyEmbossed() {
-            if (currentId === 'zoneA') { alert("凸板材質僅能使用在 B、C 區喔！"); return; }
-            const el = document.getElementById(currentId);
-            el.style.backgroundImage = `url('${embossedPaths[currentFrame]}')`;
-            el.style.backgroundColor = 'transparent';
-            zoneStates[currentId] = 'embossed';
-        }
-
-        function createPalette(list, targetId, isImg, isGlass = false) {
+        function createPalette(list, targetId, isImg, zoneLimit = 'any') {
             const container = document.getElementById(targetId);
             list.forEach(c => {
                 const div = document.createElement('div');
                 div.className = 'swatch';
                 div.onclick = () => {
-                    if (isGlass && currentId !== 'zoneA') { alert("玻璃材質僅能使用在 A 區喔！"); return; }
-                    if (!isGlass && currentId === 'zoneA') { alert("A 區只能選擇玻璃材質喔！"); return; }
+                    if (zoneLimit === 'A' && currentId !== 'zoneA') { alert("此材質僅限 A 區！"); return; }
+                    if (zoneLimit === 'BC' && currentId === 'zoneA') { alert("此材質僅限 B、C 區！"); return; }
+                    if (zoneLimit === 'any' && currentId === 'zoneA') { alert("A 區只能選擇玻璃材質！"); return; }
                     const el = document.getElementById(currentId);
                     if(isImg) { el.style.backgroundImage = `url('${c.img}')`; el.style.backgroundColor = 'transparent'; }
                     else { el.style.backgroundImage = 'none'; el.style.backgroundColor = c.hex; }
-                    zoneStates[currentId] = 'normal';
                 };
                 div.innerHTML = `<div class="color-box" style="${isImg ? 'background-image:url('+c.img+')' : 'background-color:'+c.hex}"></div><span>${c.id}</span>`;
                 container.appendChild(div);
             });
         }
-
-        createPalette(glassMaterials, 'glass-palette', true, true);
-        createPalette(woodColors, 'wood-palette', true);
-        createPalette(solidColors, 'solid-palette', false);
+        createPalette(glassMaterials, 'glass-palette', true, 'A');
+        createPalette(embossedMaterials, 'embossed-palette', true, 'BC');
+        createPalette(woodColors, 'wood-palette', true, 'BC');
+        createPalette(solidColors, 'solid-palette', false, 'BC');
     </script>
 </body>
 </html>
