@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>永偵辦公家具 屏風選色系統</title>
+    <style>
+        body { font-family: sans-serif; background: #eee; margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 20px; }
+        .wrapper { display: flex; flex-direction: row; gap: 40px; background: #fff; padding: 30px; border-radius: 15px; box-shadow: 0 8px 25px rgba(0,0,0,0.1); width: 95%; max-width: 1500px; margin-bottom: 20px; }
+        .preview-container { display: flex; flex-direction: column; align-items: center; gap: 20px; flex-shrink: 0; }
+        .main-stage { width: 450px; height: 600px; background: #fff; position: relative; overflow: hidden; border: 1px solid #ddd; }
+        .color-base { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+        .zone { position: absolute; transition: 0.1s; cursor: pointer; background-size: cover; background-position: center; }
+        #zoneA { top: 4.8%; left: 16.5%; width: 66.8%; height: 25.5%; } 
+        #zoneB { top: 31.0%; left: 16.5%; width: 66.8%; height: 29.8%; } 
+        #zoneC { top: 61.2%; left: 16.5%; width: 66.8%; height: 35.8%; } 
+        #top-frame { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2; pointer-events: none; object-fit: contain; }
+        .active { outline: 3px solid #007AFF; z-index: 10; box-shadow: inset 0 0 10px rgba(0,122,255,0.3); }
+        .controls { flex-grow: 1; display: flex; flex-direction: column; gap: 20px; height: 85vh; overflow-y: auto; padding-right: 15px; }
+        .section-title { font-size: 18px; font-weight: bold; border-left: 5px solid #007AFF; padding-left: 10px; margin: 10px 0; }
+        .frame-buttons { display: flex; gap: 10px; }
+        .btn-frame { padding: 10px 15px; cursor: pointer; border: 1px solid #ccc; border-radius: 5px; background: #fff; font-weight: bold; }
+        .palette-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; }
+        .swatch { padding: 6px; cursor: pointer; border: 1px solid #ddd; border-radius: 8px; text-align: center; background: #fafafa; }
+        .color-box { width: 100%; aspect-ratio: 1; border-radius: 4px; margin-bottom: 5px; background-size: cover; background-position: center; border: 1px solid rgba(0,0,0,0.05); }
+        .swatch span { font-size: 12px; font-weight: bold; color: #555; }
+        .footer-note { color: #777; font-size: 14px; text-align: center; margin-top: 20px; width: 100%; max-width: 800px; line-height: 1.6; }
+        #embossed-btn { background: #f0f0f0; border: 2px dashed #007AFF; }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <div class="preview-container">
+            <div class="main-stage">
+                <div class="color-base">
+                    <div id="zoneA" class="zone" onclick="selectZone('zoneA')"></div>
+                    <div id="zoneB" class="zone active" onclick="selectZone('zoneB')"></div>
+                    <div id="zoneC" class="zone" onclick="selectZone('zoneC')"></div>
+                </div>
+                <img id="top-frame" src="https://drive.google.com/thumbnail?id=1IGGYjBctTpq5F9BlCLIJg8a68_5ylVv-&sz=w1000">
+            </div>
+            <p style="color: #007AFF; font-weight: bold;">💡 請先點選左圖區塊(A/B/C)再選擇顏色</p>
+        </div>
+        <div class="controls">
+            <h1>永偵辦公家具 屏風選色系統</h1>
+            <div class="section-title">1. 外框顏色選擇</div>
+            <div class="frame-buttons">
+                <button class="btn-frame" onclick="changeFrame('dark')">深灰色</button>
+                <button class="btn-frame" onclick="changeFrame('white')">白色</button>
+                <button class="btn-frame" onclick="changeFrame('silver')">銀色</button>
+                <button class="btn-frame" onclick="changeFrame('black')">黑色</button>
+            </div>
+            <div class="section-title">2. 玻璃材質 (僅限 A 區)</div>
+            <div id="glass-palette" class="palette-grid"></div>
+            <div class="section-title">3. 特殊材質 (僅限 B、C 區)</div>
+            <div class="palette-grid">
+                <div class="swatch" id="embossed-btn" onclick="applyEmbossed()">
+                    <div id="embossed-preview" class="color-box" style="background-image: url('https://drive.google.com/thumbnail?id=14aohdKOGHAKpTpyVW-fJbePKbOzcmWk_&sz=w1000')"></div>
+                    <span>對應外框凸板</span>
+                </div>
+            </div>
+            <div class="section-title">4. 木紋系列面板 (T & C 系列)</div>
+            <div id="wood-palette" class="palette-grid"></div>
+            <div class="section-title">5. 純色系列面板 (R 系列)</div>
+            <div id="solid-palette" class="palette-grid"></div>
+        </div>
+    </div>
+    <div class="footer-note">此網頁僅供永偵辦公家具所使用，網頁預覽顏色會因螢幕設定差異略有不同，實際顏色以產品實體為主</div>
+
+    <script>
+        let currentId = 'zoneB';
+        let currentFrame = 'dark';
+        let zoneStates = { zoneA: 'empty', zoneB: 'empty', zoneC: 'empty' };
+
+        const framePaths = {
+            'dark': "https://drive.google.com/thumbnail?id=1IGGYjBctTpq5F9BlCLIJg8a68_5ylVv-&sz=w1000",
+            'white': "https://drive.google.com/thumbnail?id=1slAMTwIExEFZqR4r9C-iwFtPMyACgput&sz=w1000",
+            'silver': "https://drive.google.com/thumbnail?id=1YKfxSpQ_9pIyMnhTmGKZlQqB9w09dxxD&sz=w1000",
+            'black': "https://drive.google.com/thumbnail?id=1sMQiXbn73SGSBeYPWQJx9CMTRzLknYDo&sz=w1000"
+        };
+
+        const embossedPaths = {
+            'dark': "https://drive.google.com/thumbnail?id=14aohdKOGHAKpTpyVW-fJbePKbOzcmWk_&sz=w1000",
+            'white': "https://drive.google.com/thumbnail?id=1bnPV6SiH-XVnO-ln34c8k5nmfbYKLlUr&sz=w1000",
+            'silver': "https://drive.google.com/thumbnail?id=1P-FBfNm6ISnHuOXmW_BZsmEVNJ9thgRV&sz=w1000",
+            'black': "https://drive.google.com/thumbnail?id=1cy4l401xSJLGVOxWWLAm_G-MBt8A9NVo&sz=w1000"
+        };
+
+        const glassMaterials = [
+            {id:'霧玻璃', img:'https://drive.google.com/thumbnail?id=1rERHx1pwWdI0L1CZVIP1OhnqByTw_evJ&sz=w1000'},
+            {id:'清玻璃', img:'https://drive.google.com/thumbnail?id=1soHgAKe1eUKxpvf3hSYWQ_5PgPY_yIfM&sz=w1000'},
+            {id:'條紋玻璃', img:'https://drive.google.com/thumbnail?id=1dZ1yj9qP16MMt3VHEb47ZaNIl9qavEOy&sz=w1000'}
+        ];
+
+        const woodColors = [
+            {id:'T-9302', img:'https://drive.google.com/thumbnail?id=11qTu6bVct1_o0XTRJV9ERLqmCGsVHRim&sz=w1000'},
+            {id:'T-9305', img:'https://drive.google.com/thumbnail?id=17DKJwuo-Qsebu_5BUnKPXixgdrYoqc80&sz=w1000'},
+            {id:'T-9306', img:'https://drive.google.com/thumbnail?id=1fL6r785v3RzxoqWQ-KF6Uu48PKOtjnBc&sz=w1000'},
+            {id:'T-9308', img:'https://drive.google.com/thumbnail?id=18dnnRAEJEvCg5Cq0sq4EB-mXpDb-IUkp&sz=w1000'},
+            {id:'T-9311', img:'https://drive.google.com/thumbnail?id=1E8fueEBxNCiq2QoQwRSoS8kR7PGb7z7C&sz=w1000'},
+            {id:'T-9312', img:'https://drive.google.com/thumbnail?id=1h5-TWTlHW6rN6T_qvGfQSiOwVEbAR6I-&sz=w1000'},
+            {id:'T-9313', img:'https://drive.google.com/thumbnail?id=1B7PCZ8Dy-y7EJCeSXMLn5Q2iuG5jUKFJ&sz=w1000'},
+            {id:'T-9315', img:'https://drive.google.com/thumbnail?id=1fU25FLwjJPx5JXD-DISqFnBupybGaUUE&sz=w1000'},
+            {id:'T-9512', img:'https://drive.google.com/thumbnail?id=1eNlWRWFNvZ2lBUp0CClbBpF1hov6ZL3F&sz=w1000'},
+            {id:'T-9911', img:'https://drive.google.com/thumbnail?id=1qzlsKtSg8BvizQgnpR_H96PtiMWcljJr&sz=w1000'},
+            {id:'T-9912', img:'https://drive.google.com/thumbnail?id=13Sjk-ef9BHV-5BTgv15_if7zYZbhPZJl&sz=w1000'},
+            {id:'T-9913', img:'https://drive.google.com/thumbnail?id=18PnDkubCygZ0dISwCqztioN8DHWKNepc&sz=w1000'},
+            {id:'T-9914', img:'https://drive.google.com/thumbnail?id=12hjBoqsWcQdq3lfDC1981ZHaKRat9xp9&sz=w1000'},
+            {id:'T-9916', img:'https://drive.google.com/thumbnail?id=1BhQjw5bFbjMZVdwR_yGKUS98NHeqrhgQ&sz=w1000'},
+            {id:'T-9917', img:'https://drive.google.com/thumbnail?id=1B1mSSTvypRR-AqGHwm5DW-VZOtS7Pvn9&sz=w1000'},
+            {id:'C-901', img:'https://drive.google.com/thumbnail?id=1cep4MD0s7ryd9L8b9zufY0GYRYa2Ahay&sz=w1000'},
+            {id:'C-902', img:'https://drive.google.com/thumbnail?id=1LTtkeGveFhW013sKjWHEgr6ZbnaclyKb&sz=w1000'},
+            {id:'C-903', img:'https://drive.google.com/thumbnail?id=19us5JwmiPY35-G1Y1bK99-k3yutk7KX0&sz=w1000'},
+            {id:'C-904', img:'https://drive.google.com/thumbnail?id=1W5mR6PnF6YzAFuFspWw3Oh8KGzGVgrYu&sz=w1000'},
+            {id:'C-905', img:'https://drive.google.com/thumbnail?id=11j6BqYhGP0ZgGYX6gOoZFajtbqGb4aOd&sz=w1000'},
+            {id:'C-906', img:'https://drive.google.com/thumbnail?id=1nEX6sb5f5lD4cTf5pIzpDpEiB3fK7lzR&sz=w1000'},
+            {id:'C-907', img:'https://drive.google.com/thumbnail?id=1YUmzK9q8gxmK6mQXn3Mmny-wIeSUA6pf&sz=w1000'},
+            {id:'C-908', img:'https://drive.google.com/thumbnail?id=1lCLjAdodvop1hARDjwIZ8sPeZ_gAsOaK&sz=w1000'}
+        ];
+
+        const solidColors = [
+            {id:'R-6027', hex:'#F3AD3E'}, {id:'R-6028', hex:'#EF8E4A'}, {id:'R-6030', hex:'#F78759'}, {id:'R-6029', hex:'#EA5E3D'},
+            {id:'R-6010', hex:'#E45E91'}, {id:'R-6016', hex:'#DC3B6D'}, {id:'R-6018', hex:'#CF3841'}, {id:'R-6019', hex:'#6A2D2A'},
+            {id:'R-6056', hex:'#A5D366'}, {id:'R-6057', hex:'#59AC5A'}, {id:'R-6058', hex:'#2F7550'}, {id:'R-6059', hex:'#1F4339'},
+            {id:'R-6075', hex:'#7A5B3F'}, {id:'R-6011', hex:'#D9B8D3'}, {id:'R-6014', hex:'#CD8CB7'}, {id:'R-6017', hex:'#854F9B'},
+            {id:'R-6005', hex:'#BFC1BE'}, {id:'R-6006', hex:'#939C9B'}, {id:'R-6007', hex:'#818A89'}, {id:'R-6008', hex:'#485053'},
+            {id:'R-6066', hex:'#3F70AB'}, {id:'R-6067', hex:'#3054A0'}, {id:'R-6068', hex:'#313A7B'}, {id:'R-6061', hex:'#2E364D'}
+        ];
+
+        function changeFrame(type) {
+            currentFrame = type;
+            document.getElementById('top-frame').src = framePaths[type];
+            document.getElementById('embossed-preview').style.backgroundImage = `url('${embossedPaths[type]}')`;
+            // 自動更新 B、C 區如果正在使用凸板
+            ['zoneB', 'zoneC'].forEach(id => {
+                if(zoneStates[id] === 'embossed') {
+                    document.getElementById(id).style.backgroundImage = `url('${embossedPaths[type]}')`;
+                }
+            });
+        }
+
+        function selectZone(id) {
+            document.querySelectorAll('.zone').forEach(z => z.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            currentId = id;
+        }
+
+        function applyEmbossed() {
+            if (currentId === 'zoneA') { alert("凸板材質僅能使用在 B、C 區喔！"); return; }
+            const el = document.getElementById(currentId);
+            el.style.backgroundImage = `url('${embossedPaths[currentFrame]}')`;
+            el.style.backgroundColor = 'transparent';
+            zoneStates[currentId] = 'embossed';
+        }
+
+        function createPalette(list, targetId, isImg, isGlass = false) {
+            const container = document.getElementById(targetId);
+            list.forEach(c => {
+                const div = document.createElement('div');
+                div.className = 'swatch';
+                div.onclick = () => {
+                    if (isGlass && currentId !== 'zoneA') { alert("玻璃材質僅能使用在 A 區喔！"); return; }
+                    if (!isGlass && currentId === 'zoneA') { alert("A 區只能選擇玻璃材質喔！"); return; }
+                    const el = document.getElementById(currentId);
+                    if(isImg) { el.style.backgroundImage = `url('${c.img}')`; el.style.backgroundColor = 'transparent'; }
+                    else { el.style.backgroundImage = 'none'; el.style.backgroundColor = c.hex; }
+                    zoneStates[currentId] = 'normal';
+                };
+                div.innerHTML = `<div class="color-box" style="${isImg ? 'background-image:url('+c.img+')' : 'background-color:'+c.hex}"></div><span>${c.id}</span>`;
+                container.appendChild(div);
+            });
+        }
+
+        createPalette(glassMaterials, 'glass-palette', true, true);
+        createPalette(woodColors, 'wood-palette', true);
+        createPalette(solidColors, 'solid-palette', false);
+    </script>
+</body>
+</html>
