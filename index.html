@@ -4,151 +4,116 @@
     <meta charset="UTF-8">
     <title>永偵辦公家具 屏風選色系統</title>
     <style>
-        body { font-family: sans-serif; background: #eee; margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 20px; }
-        .wrapper { display: flex; flex-direction: row; gap: 40px; background: #fff; padding: 30px; border-radius: 15px; box-shadow: 0 8px 25px rgba(0,0,0,0.1); width: 95%; max-width: 1500px; margin-bottom: 20px; }
-        .preview-container { display: flex; flex-direction: column; align-items: center; gap: 20px; flex-shrink: 0; }
-        .main-stage { width: 450px; height: 600px; background: #fff; position: relative; overflow: hidden; border: 1px solid #ddd; }
-        .color-base { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
-        
-        /* 這裡修正了圖片置中的邏輯 */
-        .zone { 
-            position: absolute; 
-            transition: 0.1s; 
-            cursor: pointer; 
-            background-size: cover; 
-            background-position: center center; /* 強制圖片中心對齊區塊中心 */
-            background-repeat: no-repeat;
-        }
-        
-        #zoneA { top: 4.8%; left: 16.5%; width: 66.8%; height: 25.5%; } 
-        #zoneB { top: 31.0%; left: 16.5%; width: 66.8%; height: 29.8%; } 
-        #zoneC { top: 61.2%; left: 16.5%; width: 66.8%; height: 35.8%; } 
-        #top-frame { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2; pointer-events: none; object-fit: contain; }
-        .active { outline: 3px solid #007AFF; z-index: 10; box-shadow: inset 0 0 10px rgba(0,122,255,0.3); }
-        .controls { flex-grow: 1; display: flex; flex-direction: column; gap: 20px; height: 85vh; overflow-y: auto; padding-right: 15px; }
-        .section-title { font-size: 18px; font-weight: bold; border-left: 5px solid #007AFF; padding-left: 10px; margin: 10px 0; }
-        .frame-buttons { display: flex; gap: 10px; }
-        .btn-frame { padding: 10px 15px; cursor: pointer; border: 1px solid #ccc; border-radius: 5px; background: #fff; font-weight: bold; }
-        .palette-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; }
-        .swatch { padding: 6px; cursor: pointer; border: 1px solid #ddd; border-radius: 8px; text-align: center; background: #fafafa; }
-        .color-box { width: 100%; aspect-ratio: 1; border-radius: 4px; margin-bottom: 5px; background-size: cover; background-position: center; border: 1px solid rgba(0,0,0,0.05); }
-        .swatch span { font-size: 12px; font-weight: bold; color: #555; }
-        .footer-note { color: #777; font-size: 14px; text-align: center; margin-top: 20px; width: 100%; max-width: 800px; line-height: 1.6; }
+        body { font-family: sans-serif; background: #eee; margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 20px 0; }
+        .wrapper { display: flex; flex-direction: row; gap: 30px; background: #fff; padding: 25px; border-radius: 15px; box-shadow: 0 8px 25px rgba(0,0,0,0.1); width: 95%; max-width: 1200px; box-sizing: border-box; min-height: 700px; }
+        .preview-side { width: 380px; display: flex; flex-direction: column; align-items: center; flex-shrink: 0; background: #f9f9f9; border-radius: 10px; padding: 20px; box-sizing: border-box; }
+        .hint-text { color: #007AFF; font-weight: bold; margin-bottom: 15px; font-size: 18px; }
+        .stage-wrapper { display: flex; align-items: center; gap: 15px; }
+        .labels { display: flex; flex-direction: column; justify-content: space-around; height: 400px; font-weight: bold; color: #333; font-size: 24px; }
+        .main-stage { width: 300px; height: 400px; background: #fff; position: relative; border: 1px solid #ddd; }
+        .zone { position: absolute; transition: 0.1s; cursor: pointer; background-size: cover; background-position: center; z-index: 1; }
+        .active { box-shadow: inset 0 0 0 4px #007AFF; z-index: 5; }
+        #zoneA { top: 4.8%; left: 16.5%; width: 66.8%; height: 26.5%; } 
+        #zoneB { top: 31.8%; left: 16.5%; width: 66.8%; height: 29.8%; } 
+        #zoneC { top: 62.0%; left: 16.5%; width: 66.8%; height: 33.0%; } 
+        #top-frame { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; pointer-events: none; object-fit: contain; }
+        .status-display { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100%; margin-top: 25px; }
+        .status-box { background: #fff; border: 1px solid #ddd; border-radius: 6px; padding: 10px 2px; text-align: center; min-height: 65px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .status-box strong { color: #007AFF; font-size: 14px; margin-bottom: 4px; }
+        .status-box span { font-size: 11px; color: #555; font-weight: bold; line-height: 1.2; }
+        .controls { flex-grow: 1; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; max-height: 85vh; padding-right: 10px; }
+        .palette-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; width: 100%; padding: 10px 0; }
+        .swatch { padding: 8px; cursor: pointer; border: 1px solid #ddd; border-radius: 8px; text-align: center; background: #fafafa; }
+        .swatch:hover { border-color: #007AFF; }
+        .color-box { width: 75px; height: 75px; border-radius: 4px; margin: 0 auto 8px; background-size: cover; border: 1px solid rgba(0,0,0,0.1); }
+        .swatch span { font-size: 11px; font-weight: bold; color: #444; display: block; min-height: 2.4em; }
+        .accordion-header { background: #f8f9fa; color: #333; padding: 12px 15px; font-size: 16px; font-weight: bold; cursor: pointer; border: 1px solid #ddd; border-radius: 8px; margin-top: 5px; }
+        .accordion-header.active { background: #007AFF; color: #fff; }
+        .accordion-content { display: none; }
+        .btn-frame { padding: 10px 18px; cursor: pointer; border: 1px solid #ccc; border-radius: 5px; background: #fff; font-weight: bold; margin: 0 8px 8px 0; }
+        .disclaimer-container { width: 100%; text-align: center; margin-top: 30px; }
+        .disclaimer-text { color: #888; font-size: 14px; }
     </style>
 </head>
 <body>
     <div class="wrapper">
-        <div class="preview-container">
-            <div class="main-stage">
-                <div class="color-base">
-                    <div id="zoneA" class="zone" onclick="selectZone('zoneA')"></div>
-                    <div id="zoneB" class="zone active" onclick="selectZone('zoneB')"></div>
+        <div class="preview-side">
+            <div class="hint-text">💡 先點選區塊再選色</div>
+            <div class="stage-wrapper">
+                <div class="labels"><span>A</span><span>B</span><span>C</span></div>
+                <div class="main-stage">
+                    <div id="zoneA" class="zone active" onclick="selectZone('zoneA')"></div>
+                    <div id="zoneB" class="zone" onclick="selectZone('zoneB')"></div>
                     <div id="zoneC" class="zone" onclick="selectZone('zoneC')"></div>
+                    <img id="top-frame" src="https://drive.google.com/thumbnail?id=1IGGYjBctTpq5F9BlCLIJg8a68_5ylVv-&sz=w1000">
                 </div>
-                <img id="top-frame" src="https://drive.google.com/thumbnail?id=1IGGYjBctTpq5F9BlCLIJg8a68_5ylVv-&sz=w1000">
             </div>
-            <p style="color: #007AFF; font-weight: bold;">💡 請先點選左圖區塊(A/B/C)再選擇顏色</p>
+            <div class="status-display">
+                <div class="status-box"><strong>A 區 (玻璃)</strong><span id="txt-zoneA">尚未選擇</span></div>
+                <div class="status-box"><strong>B 區 (色板)</strong><span id="txt-zoneB">尚未選擇</span></div>
+                <div class="status-box"><strong>C 區 (色板)</strong><span id="txt-zoneC">尚未選擇</span></div>
+            </div>
         </div>
         <div class="controls">
-            <h1>永偵辦公家具 屏風選色系統</h1>
-            <div class="section-title">1. 外框顏色選擇</div>
-            <div class="frame-buttons">
-                <button class="btn-frame" onclick="changeFrame('dark')">深灰色</button>
-                <button class="btn-frame" onclick="changeFrame('white')">白色</button>
-                <button class="btn-frame" onclick="changeFrame('silver')">銀色</button>
-                <button class="btn-frame" onclick="changeFrame('black')">黑色</button>
-            </div>
-            <div class="section-title">2. 玻璃材質 (僅限 A 區)</div>
-            <div id="glass-palette" class="palette-grid"></div>
-            <div class="section-title">3. 凸板材質 (僅限 B、C 區)</div>
-            <div id="embossed-palette" class="palette-grid"></div>
-            <div class="section-title">4. 木紋系列面板 (T & C 系列)</div>
-            <div id="wood-palette" class="palette-grid"></div>
-            <div class="section-title">5. 純色系列面板 (R 系列)</div>
-            <div id="solid-palette" class="palette-grid"></div>
+            <h2 style="margin:0">永偵辦公家具 屏風選色系統</h2>
+            <p><strong>1. 外框顏色選擇</strong></p><div id="frame-btns"></div>
+            <p><strong>2. 玻璃材質 (限 A 區使用)</strong></p><div id="glass-palette" class="palette-container"></div>
+            <p><strong>3. 色板分類 (限 B、C 區使用)</strong></p>
+            <div class="accordion-item"><div class="accordion-header" onclick="toggleAccordion(this)">A：凸版</div><div class="accordion-content" id="cat-a"></div></div>
+            <div class="accordion-item"><div class="accordion-header" onclick="toggleAccordion(this)">B：彩虹軟片</div><div class="accordion-content" id="cat-b"></div></div>
+            <div class="accordion-item"><div class="accordion-header" onclick="toggleAccordion(this)">C：木紋軟片 T</div><div class="accordion-content" id="cat-c"></div></div>
+            <div class="accordion-item"><div class="accordion-header" onclick="toggleAccordion(this)">D：木紋發泡板</div><div class="accordion-content" id="cat-d"></div></div>
+            <div class="accordion-item"><div class="accordion-header" onclick="toggleAccordion(this)">E：立體雅松(加價)</div><div class="accordion-content" id="cat-e"></div></div>
+            <div class="accordion-item"><div class="accordion-header" onclick="toggleAccordion(this)">F：闊木霧柔(加價)</div><div class="accordion-content" id="cat-f"></div></div>
+            <div class="accordion-item"><div class="accordion-header" onclick="toggleAccordion(this)">G：印象派及洗白系列</div><div class="accordion-content" id="cat-g"></div></div>
         </div>
     </div>
-    <div class="footer-note">此網頁僅供永偵辦公家具所使用，網頁預覽顏色會因螢幕設定差異略有不同，實際顏色以產品實體為主</div>
-
+    <div class="disclaimer-container"><div class="disclaimer-text">此網頁僅供永偵辦公家具所使用，顏色因螢幕差異略有不同，實際以實體為主</div></div>
     <script>
-        let currentId = 'zoneB';
-        const framePaths = {
-            'dark': "https://drive.google.com/thumbnail?id=1IGGYjBctTpq5F9BlCLIJg8a68_5ylVv-&sz=w1000",
-            'white': "https://drive.google.com/thumbnail?id=1slAMTwIExEFZqR4r9C-iwFtPMyACgput&sz=w1000",
-            'silver': "https://drive.google.com/thumbnail?id=1YKfxSpQ_9pIyMnhTmGKZlQqB9w09dxxD&sz=w1000",
-            'black': "https://drive.google.com/thumbnail?id=1sMQiXbn73SGSBeYPWQJx9CMTRzLknYDo&sz=w1000"
+        let currentId = 'zoneA';
+        const frameData = { '深灰色': '1IGGYjBctTpq5F9BlCLIJg8a68_5ylVv-', '白色': '1slAMTwIExEFZqR4r9C-iwFtPMyACgput', '銀色': '1YKfxSpQ_9pIyMnhTmGKZlQqB9w09dxxD', '黑色': '1sMQiXbn73SGSBeYPWQJx9CMTRzLknYDo' };
+        const materials = {
+            glass: [{id:'霧玻璃', d:'1rERHx1pwWdI0L1CZVIP1OhnqByTw_evJ'}, {id:'清玻', d:'1soHgAKe1eUKxpvf3hSYWQ_5PgPY_yIfM'}, {id:'條紋玻璃', d:'1dZ1yj9qP16MMt3VHEb47ZaNIl9qavEOy'}],
+            A: [{id:'銀色凸版',d:'1P-FBfNm6ISnHuOXmW_BZsmEVNJ9thgRV'},{id:'白色凸版',d:'1bnPV6SiH-XVnO-ln34c8k5nmfbYKLlUr'},{id:'黑色凸版',d:'1cy4l401xSJLGVOxWWLAm_G-MBt8A9NVo'},{id:'深灰凸版',d:'14aohdKOGHAKpTpyVW-fJbePKbOzcmWk_'}],
+            B: [{id:'R-6027 鵝黃',h:'#F3AD3E'},{id:'R-6028 橙色',h:'#EF8E4A'},{id:'R-6029 深橘',h:'#EA5E3D'},{id:'R-6030 鮮橘',h:'#F78759'},{id:'R-6010 桃紅',h:'#E45E91'},{id:'R-6016 胭脂紅',h:'#DC3B6D'},{id:'R-6018 正紅',h:'#CF3841'},{id:'R-6019 棗紅',h:'#6A2D2A'},{id:'R-6056 青蘋果',h:'#A5D366'},{id:'R-6057 正綠',h:'#59AC5A'},{id:'R-6058 鮮綠',h:'#2F7550'},{id:'R-6059 深綠',h:'#1F4339'},{id:'R-6075 咖啡色',h:'#7A5B3F'},{id:'R-6011 淺紫',h:'#D9B8D3'},{id:'R-6014 正紫',h:'#CD8CB7'},{id:'R-6017 勿忘我',h:'#854F9B'},{id:'R-6005 淺灰',h:'#BFC1BE'},{id:'R-6006 灰色',h:'#939C9B'},{id:'R-6007 銀灰',h:'#818A89'},{id:'R-6008 鐵灰',h:'#485053'},{id:'R-6066 土耳其藍',h:'#3F70AB'},{id:'R-6067 正藍',h:'#3054A0'},{id:'R-6068 青藍',h:'#313A7B'},{id:'R-6061 深藍',h:'#2E364D'}],
+            C: [{id:'T-9219 胡桃',d:'154i8NBdeB8pcxlPk3XwSshX4WxZRsNDs'},{id:'T-9217 胡桃',d:'1Vt6blIBzq16Tjn38Rs-z2h0fswXQTAR1'},{id:'T-9213 胡桃',d:'1ybOwmpCN2pJ1NBGjrvwwTNpLFWyNXj02'},{id:'T-9312 櫻桃',d:'146_Gg9Mp5t_cNCqtxgTTw6QcPr7TinNO'},{id:'T-9917 銀絲鐵刀',d:'1B1mSSTvypRR-AqGHwm5DW-VZOtS7Pvn9'},{id:'T-9916 紅肉鐵刀',d:'1BhQjw5bFbjMZVdwR_yGKUS98NHeqrhgQ'},{id:'T-9914 人造鐵刀',d:'12hjBoqsWcQdq3lfDC1981ZHaKRat9xp9'},{id:'T-9913 鐵刀',d:'18PnDkubCygZ0dISwCqztioN8DHWKNepc'},{id:'T-9912 鐵刀',d:'13Sjk-ef9BHV-5BTgv15_if7zYZbhPZJl'},{id:'T-9911 雞翅鐵刀',d:'1qzlsKtSg8BvizQgnpR_H96PtiMWcljJr'},{id:'T-9512 櫻桃',d:'1eNlWRWFNvZ2lBUp0CClbBpF1hov6ZL3F'},{id:'T-9315 櫻桃',d:'1fU25FLwjJPx5JXD-DISqFnBupybGaUUE'},{id:'T-9313 櫻桃',d:'1B7PCZ8Dy-y7EJCeSXMLn5Q2iuG5jUKFJ'},{id:'T-9311 櫻桃',d:'1E8fueEBxNCiq2QoQwRSoS8kR7PGb7z7C'},{id:'T-9308 櫻桃',d:'18dnnRAEJEvCg5Cq0sq4EB-mXpDb-IUkp'},{id:'T-9306 櫻桃',d:'1fL6r785v3RzxoqWQ-KF6Uu48PKOtjnBc'},{id:'T-9305 櫻桃',d:'17DKJwuo-Qsebu_5BUnKPXixgdrYoqc80'},{id:'T-9302 櫻桃',d:'11qTu6bVct1_o0XTRJV9ERLqmCGsVHRim'},{id:'T-9646 白橡',d:'18CGEPPr0BoQTX2YsT50KhFKch-leGmO1'},{id:'T-9647A 白橡',d:'1EudK6fH42jMItqoiGdtVVWDOgNFrIYDk'},{id:'T-9647 白橡',d:'1X_egDTDoObdOpP0oEbJ67Jh1ceyiaJYN'},{id:'T-9645 白橡',d:'1tQxgrGxTeWUdTOzABG-PrWfnxwzNNvcP'},{id:'T-9644 白橡',d:'19dX7-jd2DDCDs_mKYSRBXKgxD5aI0QoO'},{id:'T-9643 白橡',d:'1VzRtj5RCQsZkhN0trl1uCN0bs6MYAsig'},{id:'T-9619 白橡',d:'1E7kyFkca2R8mJ7xqp6nbYPhgpUagYklC'},{id:'T-9642 白橡',d:'1pPCAp1mO2wmhG7UURiQP5kMfUfQNmPjL'},{id:'T-9618 白橡',d:'1zzJlw2tpAh6d5TONxJMT0ZOkUwMViqvZ'},{id:'T-9617 白橡',d:'1xXAxCZD8zGvwt5ZW_xhqTXzc7gpR9Pyp'},{id:'T-9615 白橡',d:'1DmXyNoOvK8a0Mu2eZdb64-d5lgRkTxf3'},{id:'T-9215 洗白',d:'19_fqZQQljxXv9aIwVcBFAUpACpZBda1Y'},{id:'T-9612 白橡',d:'1TuwEV8j6wWJUg4yGsRgztiX_G3IQ6y2S'},{id:'T-9218 洗白',d:'1Ja-SRN4YOnj-ppdQ-LXstBPfhfKku7Nc'},{id:'T-9216 洗白',d:'1CP-YWGEjaGlyfOwwsTT6MThEm7wJ_vIC'},{id:'T-9845 秋香木',d:'1-JO7wCVAxbeiRDq5Xh35F8YCGUpJ1H2v'},{id:'T-9715 柚木',d:'1LHCcqiw9zyIO4v6l5LhwMZ7DtdW8EF44'},{id:'T-9713 柚木',d:'1kO_VgvIZfQs2mSorCUklcE-2C_H54BHI'},{id:'T-9701 柚木',d:'1i6Dgx1p6VJYl7a_tZyW4ZSzVyqwyeCUS'},{id:'T-9711 柚木',d:'1gon8pjSJslxSZFu3VPlp7tW7tRpeFGi6'},{id:'T-9220 胡桃',d:'1C2c5xQj0wNCZQnxEjTL8vVkUgt46PI0B'},{id:'T-9212 胡桃',d:'1YXkNRk8lcSnQkqaxCDMwJj7SKUdqP43G'},{id:'T-9211 胡桃',d:'1w37y3J2xklONJFTJqAlTfNXbPeo7tSYW'},{id:'T-9207 胡桃',d:'11QuzsdX0RFmlS0jKQB6af629A-9Ubj19'},{id:'T-9206 胡桃',d:'1abelupda-7Pyx8Omv0j0EHdlgijmBWUI'},{id:'T-9205 胡桃',d:'14ZzdwQFGKWOJYnlxRFqBILdIZrrAox3a'}],
+            D: [{id:'K-9199 普敦胡桃',d:'1PDjchLKT2WLZJC2PkbdLhEw5GO4PJY72'},{id:'K-9197 米格蘭布紋',d:'1yx5YoL_RY19piCRU4GFOSEfuLtsyfl4e'},{id:'K-9198 羅皇布紋',d:'1TpvLLWCURYmNVGImr1DcggRdw2-dxy_3'},{id:'K-9196 山形胡桃',d:'1m2Gb-O5JP4adtSJuCRxlqra_39-pLO0d'},{id:'K-9195 灰橡木',d:'1Igm8_zopOHSvSRpPJ9Ay0ey7mgRcADol'},{id:'K-9194 珠光白橡',d:'1QU7ztzrElkVjSd8b-uZKylpFm296h_GF'},{id:'K-9193 楓紅楓木',d:'1K4Ho71vEdhANLIWlWzidLy86pQHr_snQ'},{id:'K-9192 北美楠木',d:'1CCdojMwPzRZDJukNKvOH5qULP8xu54_b'},{id:'K-9191 歐洲橡木',d:'1f5TXfAUXbLGBzbbTJ3eJZGQu_0fwYLi5'},{id:'K-9190 北美栓木',d:'1vIbiAJHgW9pvtzJUbwstpwulGZ0aDl7A'},{id:'K-9189 帝王橡木',d:'1k7nUtJEWJB7SWxkCGHFGYlPC30KvtYaB'},{id:'K-9188 北美櫻桃',d:'1_D48fhbBJMTA3Pxru0UtWQw6OHr8xlXc'}],
+            E: [{id:'C-908 夏木樹石',d:'1lCLjAdodvop1hARDjwIZ8sPeZ_gAsOaK'},{id:'C-907 立體梧桐',d:'1YUmzK9q8gxmK6mQXn3Mmny-wIeSUA6pf'},{id:'C-906 立體梧桐',d:'1nEX6sb5f5lD4cTf5pIzpDpEiB3fK7lzR'},{id:'C-905 立體雅松',d:'11j6BqYhGP0ZgGYX6gOoZFajtbqGb4aOd'},{id:'C-904 立體雅松',d:'1W5mR6PnF6YzAFuFspWw3Oh8KGzGVgrYu'},{id:'C-903 立體雅松',d:'19us5JwmiPY35-G1Y1bK99-k3yutk7KX0'},{id:'C-902 立體雅松',d:'1LTtkeGveFhW013sKjWHEgr6ZbnaclyKb'},{id:'C-901 立體雅松',d:'1cep4MD0s7ryd9L8b9zufY0GYRYa2Ahay'}],
+            F: [{id:'K-9732 胡桃',d:'1Dq4SuRZ_7luq0eoH___8cL8mAzVxOyjx'},{id:'K-9731 紅橡',d:'1qwctBUaOg-9fUMqmqMSnPaDMTJheNoYb'},{id:'K-9730 白橡',d:'16YeYidt1uQKPIKPVV3X-Wkni55L34nFf'},{id:'K-9736 黑檀',d:'14n3jkAjsggpzjDEh5VDpLEnxtTUf4fhq'},{id:'K-9733 櫻桃',d:'18Vl97rum43VZSl5P-tnxpJpADfjY5dH-'},{id:'K-9735 栓木',d:'1kTQMjL8jYpLYWOlQQ7wmFlhwLJzBFeyX'}],
+            G: [{id:'T-9862 印象派',d:'1BOlb3q5WTFgj1ABedZkcpuWJOOMQ6iAn'},{id:'T-9908 黑檀洗白',d:'1Eq2i9UqImNUjVI15GWmq5-IlR8bTEVoo'},{id:'T-9872 秋香洗白',d:'1N8rLGe4eO8WdEjUXfDnSb3ddkk11l3Dz'},{id:'T-9871 曼特寧',d:'1SlOipLPF1C5_JULHQpBrLtam_DwnzmWg'},{id:'T-9861 印象派',d:'1TnBU-LhfoC3hfz4WJo0o8Io7sWj9qvDY'},{id:'T-9863 印象派',d:'1c_LjVxPzWMJVzDDQysGeAAzYGieBvoI1'}]
         };
-        const embossedMaterials = [
-            {id:'深灰色凸板', img:'https://drive.google.com/thumbnail?id=14aohdKOGHAKpTpyVW-fJbePKbOzcmWk_&sz=w1000'},
-            {id:'白色凸板', img:'https://drive.google.com/thumbnail?id=1bnPV6SiH-XVnO-ln34c8k5nmfbYKLlUr&sz=w1000'},
-            {id:'銀色凸板', img:'https://drive.google.com/thumbnail?id=1P-FBfNm6ISnHuOXmW_BZsmEVNJ9thgRV&sz=w1000'},
-            {id:'黑色凸板', img:'https://drive.google.com/thumbnail?id=1cy4l401xSJLGVOxWWLAm_G-MBt8A9NVo&sz=w1000'}
-        ];
-        const glassMaterials = [
-            {id:'霧玻璃', img:'https://drive.google.com/thumbnail?id=1rERHx1pwWdI0L1CZVIP1OhnqByTw_evJ&sz=w1000'},
-            {id:'清玻璃', img:'https://drive.google.com/thumbnail?id=1soHgAKe1eUKxpvf3hSYWQ_5PgPY_yIfM&sz=w1000'},
-            {id:'條紋玻璃', img:'https://drive.google.com/thumbnail?id=1dZ1yj9qP16MMt3VHEb47ZaNIl9qavEOy&sz=w1000'}
-        ];
-        const woodColors = [
-            {id:'T-9302', img:'https://drive.google.com/thumbnail?id=11qTu6bVct1_o0XTRJV9ERLqmCGsVHRim&sz=w1000'},
-            {id:'T-9305', img:'https://drive.google.com/thumbnail?id=17DKJwuo-Qsebu_5BUnKPXixgdrYoqc80&sz=w1000'},
-            {id:'T-9306', img:'https://drive.google.com/thumbnail?id=1fL6r785v3RzxoqWQ-KF6Uu48PKOtjnBc&sz=w1000'},
-            {id:'T-9308', img:'https://drive.google.com/thumbnail?id=18dnnRAEJEvCg5Cq0sq4EB-mXpDb-IUkp&sz=w1000'},
-            {id:'T-9311', img:'https://drive.google.com/thumbnail?id=1E8fueEBxNCiq2QoQwRSoS8kR7PGb7z7C&sz=w1000'},
-            {id:'T-9312', img:'https://drive.google.com/thumbnail?id=1h5-TWTlHW6rN6T_qvGfQSiOwVEbAR6I-&sz=w1000'},
-            {id:'T-9313', img:'https://drive.google.com/thumbnail?id=1B7PCZ8Dy-y7EJCeSXMLn5Q2iuG5jUKFJ&sz=w1000'},
-            {id:'T-9315', img:'https://drive.google.com/thumbnail?id=1fU25FLwjJPx5JXD-DISqFnBupybGaUUE&sz=w1000'},
-            {id:'T-9512', img:'https://drive.google.com/thumbnail?id=1eNlWRWFNvZ2lBUp0CClbBpF1hov6ZL3F&sz=w1000'},
-            {id:'T-9911', img:'https://drive.google.com/thumbnail?id=1qzlsKtSg8BvizQgnpR_H96PtiMWcljJr&sz=w1000'},
-            {id:'T-9912', img:'https://drive.google.com/thumbnail?id=13Sjk-ef9BHV-5BTgv15_if7zYZbhPZJl&sz=w1000'},
-            {id:'T-9913', img:'https://drive.google.com/thumbnail?id=18PnDkubCygZ0dISwCqztioN8DHWKNepc&sz=w1000'},
-            {id:'T-9914', img:'https://drive.google.com/thumbnail?id=12hjBoqsWcQdq3lfDC1981ZHaKRat9xp9&sz=w1000'},
-            {id:'T-9916', img:'https://drive.google.com/thumbnail?id=1BhQjw5bFbjMZVdwR_yGKUS98NHeqrhgQ&sz=w1000'},
-            {id:'T-9917', img:'https://drive.google.com/thumbnail?id=1B1mSSTvypRR-AqGHwm5DW-VZOtS7Pvn9&sz=w1000'},
-            {id:'C-901', img:'https://drive.google.com/thumbnail?id=1cep4MD0s7ryd9L8b9zufY0GYRYa2Ahay&sz=w1000'},
-            {id:'C-902', img:'https://drive.google.com/thumbnail?id=1LTtkeGveFhW013sKjWHEgr6ZbnaclyKb&sz=w1000'},
-            {id:'C-903', img:'https://drive.google.com/thumbnail?id=19us5JwmiPY35-G1Y1bK99-k3yutk7KX0&sz=w1000'},
-            {id:'C-904', img:'https://drive.google.com/thumbnail?id=1W5mR6PnF6YzAFuFspWw3Oh8KGzGVgrYu&sz=w1000'},
-            {id:'C-905', img:'https://drive.google.com/thumbnail?id=11j6BqYhGP0ZgGYX6gOoZFajtbqGb4aOd&sz=w1000'},
-            {id:'C-906', img:'https://drive.google.com/thumbnail?id=1nEX6sb5f5lD4cTf5pIzpDpEiB3fK7lzR&sz=w1000'},
-            {id:'C-907', img:'https://drive.google.com/thumbnail?id=1YUmzK9q8gxmK6mQXn3Mmny-wIeSUA6pf&sz=w1000'},
-            {id:'C-908', img:'https://drive.google.com/thumbnail?id=1lCLjAdodvop1hARDjwIZ8sPeZ_gAsOaK&sz=w1000'}
-        ];
-        const solidColors = [
-            {id:'R-6027', hex:'#F3AD3E'}, {id:'R-6028', hex:'#EF8E4A'}, {id:'R-6030', hex:'#F78759'}, {id:'R-6029', hex:'#EA5E3D'},
-            {id:'R-6010', hex:'#E45E91'}, {id:'R-6016', hex:'#DC3B6D'}, {id:'R-6018', hex:'#CF3841'}, {id:'R-6019', hex:'#6A2D2A'},
-            {id:'R-6056', hex:'#A5D366'}, {id:'R-6057', hex:'#59AC5A'}, {id:'R-6058', hex:'#2F7550'}, {id:'R-6059', hex:'#1F4339'},
-            {id:'R-6075', hex:'#7A5B3F'}, {id:'R-6011', hex:'#D9B8D3'}, {id:'R-6014', hex:'#CD8CB7'}, {id:'R-6017', hex:'#854F9B'},
-            {id:'R-6005', hex:'#BFC1BE'}, {id:'R-6006', hex:'#939C9B'}, {id:'R-6007', hex:'#818A89'}, {id:'R-6008', hex:'#485053'},
-            {id:'R-6066', hex:'#3F70AB'}, {id:'R-6067', hex:'#3054A0'}, {id:'R-6068', hex:'#313A7B'}, {id:'R-6061', hex:'#2E364D'}
-        ];
-        function changeFrame(type) { document.getElementById('top-frame').src = framePaths[type]; }
-        function selectZone(id) {
-            document.querySelectorAll('.zone').forEach(z => z.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            currentId = id;
+        function toggleAccordion(h) {
+            const c = h.nextElementSibling; const active = h.classList.contains('active');
+            document.querySelectorAll('.accordion-header').forEach(el=>{el.classList.remove('active'); el.nextElementSibling.style.display='none';});
+            if(!active){h.classList.add('active'); c.style.display='block';}
         }
-        function createPalette(list, targetId, isImg, zoneLimit = 'any') {
+        function selectZone(id) { document.querySelectorAll('.zone').forEach(z=>z.classList.remove('active')); document.getElementById(id).classList.add('active'); currentId=id; }
+        function renderPalette(list, targetId) {
             const container = document.getElementById(targetId);
-            list.forEach(c => {
-                const div = document.createElement('div');
-                div.className = 'swatch';
+            const grid = document.createElement('div'); grid.className = 'palette-grid';
+            list.forEach(item => {
+                const div = document.createElement('div'); div.className = 'swatch';
                 div.onclick = () => {
-                    if (zoneLimit === 'A' && currentId !== 'zoneA') { alert("此材質僅限 A 區！"); return; }
-                    if (zoneLimit === 'BC' && currentId === 'zoneA') { alert("此材質僅限 B、C 區！"); return; }
-                    if (zoneLimit === 'any' && currentId === 'zoneA') { alert("A 區只能選擇玻璃材質！"); return; }
-                    const el = document.getElementById(currentId);
-                    if(isImg) { el.style.backgroundImage = `url('${c.img}')`; el.style.backgroundColor = 'transparent'; }
-                    else { el.style.backgroundImage = 'none'; el.style.backgroundColor = c.hex; }
+                    if (targetId === 'glass-palette' && currentId !== 'zoneA') { alert('玻璃材質僅限 A 區使用！'); return; }
+                    if (targetId.startsWith('cat-') && currentId === 'zoneA') { alert('此色板僅限 B、C 區使用！'); return; }
+                    const target = document.getElementById(currentId);
+                    if(item.d) target.style.backgroundImage = `url('https://drive.google.com/thumbnail?id=${item.d}&sz=w1000')`;
+                    else { target.style.backgroundImage = 'none'; target.style.backgroundColor = item.h; }
+                    document.getElementById('txt-' + currentId).innerText = item.id;
                 };
-                div.innerHTML = `<div class="color-box" style="${isImg ? 'background-image:url('+c.img+')' : 'background-color:'+c.hex}"></div><span>${c.id}</span>`;
-                container.appendChild(div);
+                const bg = item.d ? `background-image:url('https://drive.google.com/thumbnail?id=${item.d}&sz=w1000')` : `background-color:${item.h}`;
+                div.innerHTML = `<div class="color-box" style="${bg}"></div><span>${item.id}</span>`;
+                grid.appendChild(div);
             });
+            container.appendChild(grid);
         }
-        createPalette(glassMaterials, 'glass-palette', true, 'A');
-        createPalette(embossedMaterials, 'embossed-palette', true, 'BC');
-        createPalette(woodColors, 'wood-palette', true, 'BC');
-        createPalette(solidColors, 'solid-palette', false, 'BC');
+        Object.keys(frameData).forEach(name => {
+            const btn = document.createElement('button'); btn.className='btn-frame'; btn.innerText=name;
+            btn.onclick = () => document.getElementById('top-frame').src=`https://drive.google.com/thumbnail?id=${frameData[name]}&sz=w1000`;
+            document.getElementById('frame-btns').appendChild(btn);
+        });
+        renderPalette(materials.glass, 'glass-palette');
+        ['a','b','c','d','e','f','g'].forEach(l => renderPalette(materials[l.toUpperCase()], 'cat-'+l));
     </script>
 </body>
 </html>
