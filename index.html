@@ -25,7 +25,7 @@
         .palette-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; width: 100%; padding: 10px 0; }
         .swatch { padding: 8px; cursor: pointer; border: 1px solid #ddd; border-radius: 8px; text-align: center; background: #fafafa; }
         .swatch:hover { border-color: #007AFF; }
-        .color-box { width: 75px; height: 75px; border-radius: 4px; margin: 0 auto 8px; background-size: cover; border: 1px solid rgba(0,0,0,0.1); }
+        .color-box { width: 75px; height: 75px; border-radius: 4px; margin: 0 auto 8px; background-size: cover; border: 1px solid rgba(0,0,0,0.1); background-position: center; }
         .swatch span { font-size: 11px; font-weight: bold; color: #444; display: block; min-height: 2.4em; }
         .accordion-header { background: #f8f9fa; color: #333; padding: 12px 15px; font-size: 16px; font-weight: bold; cursor: pointer; border: 1px solid #ddd; border-radius: 8px; margin-top: 5px; }
         .accordion-header.active { background: #007AFF; color: #fff; }
@@ -45,7 +45,7 @@
                     <div id="zoneA" class="zone active" onclick="selectZone('zoneA')"></div>
                     <div id="zoneB" class="zone" onclick="selectZone('zoneB')"></div>
                     <div id="zoneC" class="zone" onclick="selectZone('zoneC')"></div>
-                    <img id="top-frame" src="https://drive.google.com/thumbnail?id=1IGGYjBctTpq5F9BlCLIJg8a68_5ylVv-&sz=w1000">
+                    <img id="top-frame" src="https://drive.google.com/thumbnail?id=1lxxZQyB4XmOrKsKad58LQCL2E-Rr7rhx&sz=w1000">
                 </div>
             </div>
             <div class="status-display">
@@ -55,9 +55,9 @@
             </div>
         </div>
         <div class="controls">
-            <h2 style="margin:0">永偵辦公家具 選色系統</h2>
+            <h2 style="margin:0">永偵辦公家具 屏風選色系統</h2>
             <p><strong>1. 外框顏色選擇</strong></p><div id="frame-btns"></div>
-            <p><strong>2. 玻璃材質 (限 A 區使用)</strong></p><div id="glass-palette"></div>
+            <p><strong>2. 玻璃材質 (限 A 區使用)</strong></p><div id="glass-palette" class="palette-container"></div>
             <p><strong>3. 色板分類 (限 B、C 區使用)</strong></p>
             <div class="accordion-item"><div class="accordion-header" onclick="toggleAccordion(this)">A：凸版</div><div class="accordion-content" id="cat-a"></div></div>
             <div class="accordion-item"><div class="accordion-header" onclick="toggleAccordion(this)">B：彩虹軟片</div><div class="accordion-content" id="cat-b"></div></div>
@@ -71,16 +71,114 @@
     <div class="disclaimer-container"><div class="disclaimer-text">此網頁僅供永偵辦公家具所使用，顏色因螢幕差異略有不同，實際以實體為主</div></div>
     <script>
         let currentId = 'zoneA';
-        const frameData = { '深灰色': '1IGGYjBctTpq5F9BlCLIJg8a68_5ylVv-', '白色': '1slAMTwIExEFZqR4r9C-iwFtPMyACgput', '銀色': '1YKfxSpQ_9pIyMnhTmGKZlQqB9w09dxxD', '黑色': '1sMQiXbn73SGSBeYPWQJx9CMTRzLknYDo' };
+        const frameData = { 
+            '銀色': '1g6uUuelf3B2K8OJX5kygJ4EATX7eEdCf', 
+            '黑色': '1Rl3zj41GjUJNMYbkYkyeAZ5A9y09VsD9', 
+            '深灰色': '1lxxZQyB4XmOrKsKad58LQCL2E-Rr7rhx', 
+            '白色': '1ZHfDc1KksXt-XJRi33ZsBDJo4d5Zvhm3' 
+        };
         const materials = {
-            glass: [{id:'霧玻璃', d:'1rERHx1pwWdI0L1CZVIP1OhnqByTw_evJ'}, {id:'清玻', d:'1soHgAKe1eUKxpvf3hSYWQ_5PgPY_yIfM'}, {id:'條紋玻璃', d:'1dZ1yj9qP16MMt3VHEb47ZaNIl9qavEOy'}],
-            A: [{id:'銀色凸版',d:'1P-FBfNm6ISnHuOXmW_BZsmEVNJ9thgRV'},{id:'白色凸版',d:'1bnPV6SiH-XVnO-ln34c8k5nmfbYKLlUr'},{id:'黑色凸版',d:'1cy4l401xSJLGVOxWWLAm_G-MBt8A9NVo'},{id:'深灰凸版',d:'14aohdKOGHAKpTpyVW-fJbePKbOzcmWk_'}],
-            B: [{id:'R-6027 鵝黃',h:'#F3AD3E'},{id:'R-6028 橙色',h:'#EF8E4A'},{id:'R-6029 深橘',h:'#EA5E3D'},{id:'R-6030 鮮橘',h:'#F78759'},{id:'R-6010 桃紅',h:'#E45E91'},{id:'R-6016 胭脂紅',h:'#DC3B6D'},{id:'R-6018 正紅',h:'#CF3841'},{id:'R-6019 棗紅',h:'#6A2D2A'},{id:'R-6056 青蘋果',h:'#A5D366'},{id:'R-6057 正綠',h:'#59AC5A'},{id:'R-6058 鮮綠',h:'#2F7550'},{id:'R-6059 深綠',h:'#1F4339'},{id:'R-6075 咖啡色',h:'#7A5B3F'},{id:'R-6011 淺紫',h:'#D9B8D3'},{id:'R-6014 正紫',h:'#CD8CB7'},{id:'R-6017 勿忘我',h:'#854F9B'},{id:'R-6005 淺灰',h:'#BFC1BE'},{id:'R-6006 灰色',h:'#939C9B'},{id:'R-6007 銀灰',h:'#818A89'},{id:'R-6008 鐵灰',h:'#485053'},{id:'R-6066 土耳其藍',h:'#3F70AB'},{id:'R-6067 正藍',h:'#3054A0'},{id:'R-6068 青藍',h:'#313A7B'},{id:'R-6061 深藍',h:'#2E364D'}],
-            C: [{id:'T-9219 胡桃',d:'154i8NBdeB8pcxlPk3XwSshX4WxZRsNDs'},{id:'T-9217 胡桃',d:'1Vt6blIBzq16Tjn38Rs-z2h0fswXQTAR1'},{id:'T-9213 胡桃',d:'1ybOwmpCN2pJ1NBGjrvwwTNpLFWyNXj02'},{id:'T-9312 櫻桃',d:'146_Gg9Mp5t_cNCqtxgTTw6QcPr7TinNO'},{id:'T-9917 銀絲鐵刀',d:'1B1mSSTvypRR-AqGHwm5DW-VZOtS7Pvn9'},{id:'T-9916 紅肉鐵刀',d:'1BhQjw5bFbjMZVdwR_yGKUS98NHeqrhgQ'},{id:'T-9914 人造鐵刀',d:'12hjBoqsWcQdq3lfDC1981ZHaKRat9xp9'},{id:'T-9913 鐵刀',d:'18PnDkubCygZ0dISwCqztioN8DHWKNepc'},{id:'T-9912 鐵刀',d:'13Sjk-ef9BHV-5BTgv15_if7zYZbhPZJl'},{id:'T-9911 雞翅鐵刀',d:'1qzlsKtSg8BvizQgnpR_H96PtiMWcljJr'},{id:'T-9512 櫻桃',d:'1eNlWRWFNvZ2lBUp0CClbBpF1hov6ZL3F'},{id:'T-9315 櫻桃',d:'1fU25FLwjJPx5JXD-DISqFnBupybGaUUE'},{id:'T-9313 櫻桃',d:'1B7PCZ8Dy-y7EJCeSXMLn5Q2iuG5jUKFJ'},{id:'T-9311 櫻桃',d:'1E8fueEBxNCiq2QoQwRSoS8kR7PGb7z7C'},{id:'T-9308 櫻桃',d:'18dnnRAEJEvCg5Cq0sq4EB-mXpDb-IUkp'},{id:'T-9306 櫻桃',d:'1fL6r785v3RzxoqWQ-KF6Uu48PKOtjnBc'},{id:'T-9305 櫻桃',d:'17DKJwuo-Qsebu_5BUnKPXixgdrYoqc80'},{id:'T-9302 櫻桃',d:'11qTu6bVct1_o0XTRJV9ERLqmCGsVHRim'},{id:'T-9646 白橡',d:'18CGEPPr0BoQTX2YsT50KhFKch-leGmO1'},{id:'T-9647A 白橡',d:'1EudK6fH42jMItqoiGdtVVWDOgNFrIYDk'},{id:'T-9647 白橡',d:'1X_egDTDoObdOpP0oEbJ67Jh1ceyiaJYN'},{id:'T-9645 白橡',d:'1tQxgrGxTeWUdTOzABG-PrWfnxwzNNvcP'},{id:'T-9644 白橡',d:'19dX7-jd2DDCDs_mKYSRBXKgxD5aI0QoO'},{id:'T-9643 白橡',d:'1VzRtj5RCQsZkhN0trl1uCN0bs6MYAsig'},{id:'T-9619 白橡',d:'1E7kyFkca2R8mJ7xqp6nbYPhgpUagYklC'},{id:'T-9642 白橡',d:'1pPCAp1mO2wmhG7UURiQP5kMfUfQNmPjL'},{id:'T-9618 白橡',d:'1zzJlw2tpAh6d5TONxJMT0ZOkUwMViqvZ'},{id:'T-9617 白橡',d:'1xXAxCZD8zGvwt5ZW_xhqTXzc7gpR9Pyp'},{id:'T-9615 白橡',d:'1DmXyNoOvK8a0Mu2eZdb64-d5lgRkTxf3'},{id:'T-9215 洗白',d:'19_fqZQQljxXv9aIwVcBFAUpACpZBda1Y'},{id:'T-9612 白橡',d:'1TuwEV8j6wWJUg4yGsRgztiX_G3IQ6y2S'},{id:'T-9218 洗白',d:'1Ja-SRN4YOnj-ppdQ-LXstBPfhfKku7Nc'},{id:'T-9216 洗白',d:'1CP-YWGEjaGlyfOwwsTT6MThEm7wJ_vIC'},{id:'T-9845 秋香木',d:'1-JO7wCVAxbeiRDq5Xh35F8YCGUpJ1H2v'},{id:'T-9715 柚木',d:'1LHCcqiw9zyIO4v6l5LhwMZ7DtdW8EF44'},{id:'T-9713 柚木',d:'1kO_VgvIZfQs2mSorCUklcE-2C_H54BHI'},{id:'T-9701 柚木',d:'1i6Dgx1p6VJYl7a_tZyW4ZSzVyqwyeCUS'},{id:'T-9711 柚木',d:'1gon8pjSJslxSZFu3VPlp7tW7tRpeFGi6'},{id:'T-9220 胡桃',d:'1C2c5xQj0wNCZQnxEjTL8vVkUgt46PI0B'},{id:'T-9212 胡桃',d:'1YXkNRk8lcSnQkqaxCDMwJj7SKUdqP43G'},{id:'T-9211 胡桃',d:'1w37y3J2xklONJFTJqAlTfNXbPeo7tSYW'},{id:'T-9207 胡桃',d:'11QuzsdX0RFmlS0jKQB6af629A-9Ubj19'},{id:'T-9206 胡桃',d:'1abelupda-7Pyx8Omv0j0EHdlgijmBWUI'},{id:'T-9205 胡桃',d:'14ZzdwQFGKWOJYnlxRFqBILdIZrrAox3a'}],
-            D: [{id:'K-9199 普敦胡桃',d:'1PDjchLKT2WLZJC2PkbdLhEw5GO4PJY72'},{id:'K-9197 米格蘭布紋',d:'1yx5YoL_RY19piCRU4GFOSEfuLtsyfl4e'},{id:'K-9198 羅皇布紋',d:'1TpvLLWCURYmNVGImr1DcggRdw2-dxy_3'},{id:'K-9196 山形胡桃',d:'1m2Gb-O5JP4adtSJuCRxlqra_39-pLO0d'},{id:'K-9195 灰橡木',d:'1Igm8_zopOHSvSRpPJ9Ay0ey7mgRcADol'},{id:'K-9194 珠光白橡',d:'1QU7ztzrElkVjSd8b-uZKylpFm296h_GF'},{id:'K-9193 楓紅楓木',d:'1K4Ho71vEdhANLIWlWzidLy86pQHr_snQ'},{id:'K-9192 北美楠木',d:'1CCdojMwPzRZDJukNKvOH5qULP8xu54_b'},{id:'K-9191 歐洲橡木',d:'1f5TXfAUXbLGBzbbTJ3eJZGQu_0fwYLi5'},{id:'K-9190 北美栓木',d:'1vIbiAJHgW9pvtzJUbwstpwulGZ0aDl7A'},{id:'K-9189 帝王橡木',d:'1k7nUtJEwJB7SWxkCGHFGYlPC30KvtYaB'},{id:'K-9188 北美櫻桃',d:'1_D48fhbBJMTA3Pxru0UtWQw6OHr8xlXc'}],
-            E: [{id:'C-907 立體梧桐',d:'1YUmzK9q8gxmK6mQXn3Mmny-wIeSUA6pf'},{id:'C-906 立體梧桐',d:'1nEX6sb5f5lD4cTf5pIzpDpEiB3fK7lzR'},{id:'C-905 立體雅松',d:'11j6BqYhGP0ZgGYX6gOoZFajtbqGb4aOd'},{id:'C-904 立體雅松',d:'1W5mR6PnF6YzAFuFspWw3Oh8KGzGVgrYu'},{id:'C-903 立體雅松',d:'19us5JwmiPY35-G1Y1bK99-k3yutk7KX0'},{id:'C-902 立體雅松',d:'1LTtkeGveFhW013sKjWHEgr6ZbnaclyKb'},{id:'C-901 立體雅松',d:'1cep4MD0s7ryd9L8b9zufY0GYRYa2Ahay'}],
-            F: [{id:'K-9732 胡桃',d:'1Dq4SuRZ_7luq0eoH___8cL8mAzVxOyjx'},{id:'K-9731 紅橡',d:'1qwctBUaOg-9fUMqmqMSnPaDMTJheNoYb'},{id:'K-9730 白橡',d:'16YeYidt1uQKPIKPVV3X-Wkni55L34nFf'},{id:'K-9736 黑檀',d:'14n3jkAjsggpzjDEh5VDpLEnxtTUf4fhq'},{id:'K-9733 櫻桃',d:'18Vl97rum43VZSl5P-tnxpJpADfjY5dH-'},{id:'K-9735 栓木',d:'1kTQMjL8jYpLYWOlQQ7wmFlhwLJzBFeyX'}],
-            G: [{id:'T-9862 印象派',d:'1BOlb3q5WTFgj1ABedZkcpuWJOOMQ6iAn'},{id:'T-9908 黑檀洗白',d:'1Eq2i9UqImNUjVI15GWmq5-IlR8bTEVoo'},{id:'T-9872 秋香洗白',d:'1N8rLGe4eO8WdEjUXfDnSb3ddkk11l3Dz'},{id:'T-9871 曼特寧',d:'1SlOipLPF1C5_JULHQpBrLtam_DwnzmWg'},{id:'T-9861 印象派',d:'1TnBU-LhfoC3hfz4WJo0o8Io7sWj9qvDY'},{id:'T-9863 印象派',d:'1c_LjVxPzWMJVzDDQysGeAAzYGieBvoI1'}]
+            glass: [
+                {id:'霧玻璃', d:'1yrmmEg_b6fQJfEo5gXIZ23G494rcokhf'}, 
+                {id:'清玻璃', d:'1BfZio2PuiFgxoQ5cPFIpMjjQw5XG_d-j'}, 
+                {id:'條紋玻璃', d:'1OTC_Qry0uQTvfBVJXhv30gIAGg1H04Cs'}
+            ],
+            A: [
+                {id:'深灰凸版',d:'1obgd7_OQ7v4wfRQFqjQIsyekhuIxji82'},
+                {id:'白色凸版',d:'19QrsekTwy4BhXx4zeSiiTOJdU0nsTfRh'},
+                {id:'黑色凸版',d:'1GwLp4l1aTgt30v4BIapoAwIUejz2BOME'},
+                {id:'銀色凸版',d:'1pijJlCeWwVoTf-dWXlmwxqlH4enaUZeg'}
+            ],
+            B: [
+                {id:'R-6027 鵝黃',h:'#F3AD3E'},{id:'R-6028 橙色',h:'#EF8E4A'},{id:'R-6029 深橘',h:'#EA5E3D'},{id:'R-6030 鮮橘',h:'#F78759'},{id:'R-6010 桃紅',h:'#E45E91'},{id:'R-6016 胭脂紅',h:'#DC3B6D'},{id:'R-6018 正紅',h:'#CF3841'},{id:'R-6019 棗紅',h:'#6A2D2A'},{id:'R-6056 青蘋果',h:'#A5D366'},{id:'R-6057 正綠',h:'#59AC5A'},{id:'R-6058 鮮綠',h:'#2F7550'},{id:'R-6059 深綠',h:'#1F4339'},{id:'R-6075 咖啡色',h:'#7A5B3F'},{id:'R-6011 淺紫',h:'#D9B8D3'},{id:'R-6014 正紫',h:'#CD8CB7'},{id:'R-6017 勿忘我',h:'#854F9B'},{id:'R-6005 淺灰',h:'#BFC1BE'},{id:'R-6006 灰色',h:'#939C9B'},{id:'R-6007 銀灰',h:'#818A89'},{id:'R-6008 鐵灰',h:'#485053'},{id:'R-6066 土耳其藍',h:'#3F70AB'},{id:'R-6067 正藍',h:'#3054A0'},{id:'R-6068 青藍',h:'#313A7B'},{id:'R-6061 深藍',h:'#2E364D'}
+            ],
+            C: [
+                {id:'T-9647A 白橡(直)',d:'1UKay4rMAq3M5imhySI5EOpdRaeN-07ZU'},
+                {id:'T-9644 白橡(直)',d:'1Ob4a2-XrCYw6dFW-KYqkW-qkBhLhsM5z'},
+                {id:'T-9647 白橡(直)',d:'1CL3ZGthSWMWq8ngc2XIcS8VTFCHUUZXH'},
+                {id:'T-9643 白橡(直)',d:'1n2bU9bkkT9VZg0N0SY5YD8GVIK19pDLn'},
+                {id:'T-9646 白橡(直)',d:'1PvlsOs9p1N8J4wR_I-sTM231D7tT-R-L'},
+                {id:'T-9645 白橡(直)',d:'1lT2isGmmwnAuvyKrCFyIiqj_EXCjNlXt'},
+                {id:'T-9642 白橡(直)',d:'1ETDCCpapN0tQskz0IS2W_egy2uTayT5z'},
+                {id:'T-9917 銀絲鐵刀(直)',d:'1FKbdG8JkCRa3ibtwjmdHL5TsQBvYyJrf'},
+                {id:'T-9916 紅肉鐵刀(直)',d:'1hZgCA2cXtaVkHGFLlPu2JbELJGIgx1KQ'},
+                {id:'T-9914 人造鐵刀(直)',d:'19vPthUg6J5ToJ6yrrij9yC5pnN3r29Rm'},
+                {id:'T-9913 鐵刀(直)',d:'1qSeBVvO86AQcxHnve3jU-s4hbZHC_QlT'},
+                {id:'T-9912 鐵刀(直)',d:'13vEcdAsozV9SiNcPi9Gke-MiqE141Ycd'},
+                {id:'T-9911 雞翅鐵刀(直)',d:'1nAn8_ETPxRc1Gkrt1UaDgkGcrhjUiU3y'},
+                {id:'T-9512 櫻桃(直)',d:'1T3ijwd1q9U-indpIC66nfNZKrHZRLq5X'},
+                {id:'T-9315 櫻桃(直)',d:'1dnl9hBKDfEwLnXEF6tA204PcKLdsyl-g'},
+                {id:'T-9313 櫻桃(拼花)',d:'1GuKnPiKnp4TmsXaMtkXs-pQKtIp15it9'},
+                {id:'T-9311 櫻桃(直)',d:'1ptm849qw68Ie3TEgDBmBZdwplAgMuqVF'},
+                {id:'T-9308 櫻桃(曲)',d:'1vi8ZEqtRuhZDrKlhxcWLO2NNxuiNmvmZ'},
+                {id:'T-9306 櫻桃(曲)',d:'1nuNUUr5dmIA6CfYmS-w9aq65GThxe7DH'},
+                {id:'T-9305 櫻桃(曲)',d:'1tA74QS9l98PmVkBtoXGTySpSaMQlEjm_'},
+                {id:'T-9302 櫻桃(曲)',d:'1FWLRxyAZuwzhfGkaUJwRUBahUGMXVwoU'},
+                {id:'T9619 白橡(直)',d:'1QmvG7L664qljt2A4nkng70MUren6qJPd'},
+                {id:'T-9618 白橡(直)',d:'1T9bsMg3EzI38EqOR7E9hXLvLsGGOYpE0'},
+                {id:'T-9617 白橡(直)',d:'12JmUaXX4N6xSJieQbyGbtlYVgUr6LGc5'},
+                {id:'T-9615 白橡(直)',d:'1nwcs_IPAkeynX7H0Yj8OJZa0-MlDaI12'},
+                {id:'T-9612白橡(直)',d:'1UR5nwoIAdkE_DRCq0Op9RPYSd4vprb66'},
+                {id:'T-9218 洗白(直)',d:'1KF77VYgct7bugIPaB3ig9u29wBsOB122'},
+                {id:'T-9216 洗白(直)',d:'16FfRSvGvmxYMvY3Fle8rlJXoOAjDUaNj'},
+                {id:'T-9215 洗白(直)',d:'143ROkeZDum7R8oKMZkUMbEm-Ynvg3GiS'},
+                {id:'T-9220 胡桃(曲)',d:'1Y4o0MVOY3GwHfKJeQgHibwbKbaGun6Bq'},
+                {id:'T-9715 柚木(直)',d:'1sCq0I9S0GeC1MH-qkttNpx7pkJkOAEmm'},
+                {id:'T-9713 柚木(直)',d:'1ArwtaBJW13qiQ2hDvigvwVchGqC-PZNO'},
+                {id:'T-9701 柚木(曲)',d:'1G-J7-kAqu0_9NFvAFYisJeR3cCvXT-GM'},
+                {id:'T-9845 秋香木(直)',d:'19c-ZzMQw2_ES9RPLlmnoLBu-sOMIbIm1'},
+                {id:'T-9711 柚木(直)',d:'1RINmnXrU0mujhNVzC2R9rmf1eJ6_qIKN'},
+                {id:'T-9219 胡桃(直)',d:'1ILxOFm2MmR3AFdhXitOfAjyIr_WPcz4y'},
+                {id:'T-9217 胡桃(直)',d:'1iCNn7fYz8fYPsZTFU4AuiusPuNMDwu63'},
+                {id:'T-9213 胡桃(直)',d:'10kxNBjs-ikjAyM4NPTNeP56206miIVbE'},
+                {id:'T-9212 胡桃(直)',d:'1o-KGDjy2B2llnApPcCDIJzzew7-I_38T'},
+                {id:'T-9211 胡桃(直)',d:'1xs4ji3UAKXxLCsez07GO7JA7KQfbhERo'},
+                {id:'T-9207 胡桃(曲)',d:'1iDjoubaniQuJDfLP68uVrt23dZCmBos7'},
+                {id:'T-9206 胡桃(曲)',d:'1Pdd_oUA9aCXKUYp5S7Lf1TluiaF38E3Y'},
+                {id:'T-9205 胡桃(曲)',d:'14tKkbyCFwU3tsOK3yFXaest5dL0UN5Si'},
+                {id:'T-9202 胡桃(曲)',d:'1LscVVDjxKMGDGfLQqSVue4aJuAakU4jQ'},
+                {id:'T-9312 櫻桃(拼花)',d:'1a1TnLvrxcvSGq6G5O1pmhMG-A_SJsxeE'}
+            ],
+            D: [
+                {id:'K-9199普敦胡桃(木紋)',d:'1u1aFcOH6GMjQbdX-dnHbBUzj0g_WbtHi'},
+                {id:'K-9196山形胡桃(曲)',d:'1o79oAaWKgUdEDTlXknBL1zj4wu_Z30_m'},
+                {id:'K-9195灰橡木(曲)',d:'1IjeBrnNldSXDTgBLIdjgxRBSCI5M-p63'},
+                {id:'K-9194珠光白橡(直)',d:'1Zc9dOjAxGe9mJl9cwfnF5C5kPpm_fQVk'},
+                {id:'K-9193楓紅楓木(曲)',d:'1R2K6gqFDLp6L1KsLj1wy3ziB1zZ6sPcf'},
+                {id:'K-9192北美楠木(曲)',d:'11BOa9ykQgV-kjGDIzxdZcmc2sCtPO9Ee'},
+                {id:'K-9191歐洲橡木(半曲)',d:'1tkfYKi4NqiKIt0oO9sm6rHs3-dt-PRKa'},
+                {id:'K-9190北美栓木(曲)',d:'1ZSCmOey1jrH9-c5VbCAOxiRqPX0Mzfb1'},
+                {id:'K-9189帝王橡木(半曲)',d:'1KTBB2_RMR7KcjlHT_wlE8LxAXSKnqsFN'},
+                {id:'K-9188 北美櫻桃(曲)',d:'1YD2Xnu2PTPgjR-BVnCH8mxLAXXX58I1A'},
+                {id:'K-9198 羅皇布紋',d:'1IPe-88wRHpMcLvaE8GDgMbTX3tIzyom7'},
+                {id:'K-9197 米格蘭布紋',d:'1bcX6r236UZesu8Bj8I30fFUOfPdcVLHu'}
+            ],
+            E: [
+                {id:'C-904 立體雅松',d:'1vY9RqAHaKN2LobmThkm3V4iUjtIxPYTe'},
+                {id:'C-903 立體雅松',d:'1BB7o3UJNtP5vQ5M7ogDOSlJUOKA-K0xt'},
+                {id:'C-902 立體雅松',d:'1ihWjGDb5yV1fPVsgCB8KvnzcFABlew0E'},
+                {id:'C-901 立體雅松',d:'1T-57iUdAimOBE9ocDuCz0fwU-OWPmmun'},
+                {id:'C-906 立體梧桐',d:'1tFoplrO7esGrMnjgxSCn_ZMtIZZv00Uo'},
+                {id:'C-907 立體梧桐',d:'1d8xBwGtnQB6u-ZXRHZbXN81dAsreQWRS'},
+                {id:'C-905 立體雅松',d:'10WIYZvvDvDLy3dZ6jVJ91kH_fzAoT4Pt'}
+            ],
+            F: [
+                {id:'K-9736黑檀',d:'1rqmARzAfQi9Jt-gFHvF8TGO--pQeVaAi'},
+                {id:'K-9735栓木',d:'1C6_nJmmxHHua1CSTrobHWI5J0QWYoteL'},
+                {id:'K-9733櫻桃',d:'1fUHWYlb5rPY3R0sgyE7f8EQl0Ga_DU50'},
+                {id:'K-9732胡桃',d:'1QaqI36QU9xdzNI7yyJqoC24okN4azvNY'},
+                {id:'K-9731紅橡',d:'1ulmgbZOhlxfSwwETmilAUGMLvkuLBd8P'},
+                {id:'K-9730白橡',d:'175oDAYpEmvcHM2S12sPCJeH1-eGzc3gt'}
+            ],
+            G: [
+                {id:'T-9908黑檀洗白(直)',d:'1I1KJHxDAmxR-m3fTJQqb3UC_bFnMkw_f'},
+                {id:'T-9873銀杏(直)',d:'14TlVGDf2tq1mnXbBbesOp5ErlIDSPUx7'},
+                {id:'T-9872秋香洗白(直)',d:'1ywUfAYFROLaviWZlegJCOh1gmoAvpIKL'},
+                {id:'T-9871曼特寧(直)',d:'1zpokjG7yEtWN4waG5Jg6tweFsppbVRyF'},
+                {id:'T-9863印象派',d:'1BBlHKeihoAXOa10davNEZ_FwiCeZtl--'},
+                {id:'T-9862印象派',d:'19KJfkBg2kJlEVjTXgiqHCvPsvOZifCZp'},
+                {id:'T-9861印象派',d:'1SjKZ2Nfqa0BTe88pYfAZ-k4yJbtEMXkT'}
+            ]
         };
         function toggleAccordion(h) {
             const c = h.nextElementSibling; const active = h.classList.contains('active');
@@ -95,7 +193,7 @@
                 const div = document.createElement('div'); div.className = 'swatch';
                 div.onclick = () => {
                     if (targetId === 'glass-palette' && currentId !== 'zoneA') { alert('玻璃材質僅限 A 區使用！'); return; }
-                    if (targetId.startsWith('cat-') && (currentId === 'zoneA')) { alert('此色板僅限 B、C 區使用！'); return; }
+                    if (targetId.startsWith('cat-') && currentId === 'zoneA') { alert('此色板僅限 B、C 區使用！'); return; }
                     const target = document.getElementById(currentId);
                     if(item.d) target.style.backgroundImage = `url('https://drive.google.com/thumbnail?id=${item.d}&sz=w1000')`;
                     else { target.style.backgroundImage = 'none'; target.style.backgroundColor = item.h; }
